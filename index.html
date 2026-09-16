@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>캐릭터 스타일 AI</title>
+<script src="https://js.puter.com/v2/"></script>
+<style>
+body{font-family:Arial,sans-serif;max-width:720px;margin:auto;padding:18px;background:#f5f5f5}
+.box{background:#fff;padding:16px;margin:12px 0;border-radius:14px}
+input,textarea,button{width:100%;box-sizing:border-box;margin-top:8px;padding:12px;border-radius:10px;border:1px solid #ccc}
+button{background:#222;color:#fff;font-weight:bold;border:0}
+button:disabled{opacity:.5}
+img{max-width:100%;border-radius:12px;margin-top:12px}
+</style>
+</head>
+<body>
+<h1>🎨 캐릭터 스타일 AI</h1>
+<div class="box">
+<b>1. 캐릭터 이미지</b>
+<input id="char" type="file" accept="image/*">
+</div>
+<div class="box">
+<b>2. 스타일 참고 이미지 (여러 장)</b>
+<input id="styles" type="file" accept="image/*" multiple>
+</div>
+<div class="box">
+<b>3. 원하는 요청</b>
+<textarea id="prompt" rows="4" placeholder="예: 캐릭터의 얼굴과 옷은 유지하고 참고 이미지의 선화와 색감 느낌을 반영해줘."></textarea>
+</div>
+<div class="box">
+<button id="go">✨ 그림 만들기</button>
+<p id="status"></p>
+<div id="result"></div>
+</div>
+
+<script>
+const toDataURL = f => new Promise((resolve,reject)=>{
+  const r=new FileReader();
+  r.onload=()=>resolve(r.result);
+  r.onerror=reject;
+  r.readAsDataURL(f);
+});
+
+document.getElementById("go").onclick = async () => {
+  const char=document.getElementById("char").files[0];
+  const styles=[...document.getElementById("styles").files];
+  const extra=document.getElementById("prompt").value.trim();
+  const status=document.getElementById("status");
+  const result=document.getElementById("result");
+  const btn=document.getElementById("go");
+
+  if(!char) return alert("캐릭터 이미지를 올려줘!");
+  if(!styles.length) return alert("스타일 참고 이미지를 한 장 이상 올려줘!");
+
+  btn.disabled=true;
+  result.innerHTML="";
+  status.textContent="이미지를 준비하는 중...";
+
+  try{
+    const inputs=[await toDataURL(char)];
+    for(const f of styles) inputs.push(await toDataURL(f));
+
+    const prompt =
+      "첫 번째 이미지는 캐릭터 기준 이미지이고 나머지는 시각적 참고 이미지다. " +
+      "첫 번째 이미지의 캐릭터 정체성과 주요 특징은 유지한다. " +
+      "나머지 참고 이미지의 선화, 색감, 명암, 표현 방식 등의 시각적 특징을 참고해 새로운 그림을 만든다. " +
+      "참고 이미지 속 특정 인물이나 고유 캐릭터를 그대로 복제하지 않는다. " +
+      (extra || "자연스럽고 완성도 높은 일러스트로 만들어줘.");
+
+    status.textContent="AI가 그림을 만드는 중...";
+
+    const image=await puter.ai.txt2img({
+      prompt,
+      model:"gpt-image-2",
+      input_images:inputs
+    });
+
+    result.appendChild(image);
+    status.textContent="완성!";
+  }catch(err){
+    console.error(err);
+    status.textContent="생성에 실패했어.";
+    alert("생성에 실패했어. 잠시 후 다시 시도해줘.\n"+(err.message||err));
+  }finally{
+    btn.disabled=false;
+  }
+};
+</script>
+</body>
+</html>
