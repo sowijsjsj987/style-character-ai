@@ -62,6 +62,7 @@ button{
 
 button:disabled{
   opacity:.5;
+  cursor:not-allowed;
 }
 
 .preview{
@@ -107,10 +108,6 @@ button:disabled{
 <h1>🎨 캐릭터 스타일 AI</h1>
 
 
-<!-- ================================= -->
-<!-- 1. 캐릭터 -->
-<!-- ================================= -->
-
 <div class="box">
 
 <div class="title">1. 🧑 캐릭터 이미지</div>
@@ -132,10 +129,6 @@ button:disabled{
 
 </div>
 
-
-<!-- ================================= -->
-<!-- 2. 그림체 -->
-<!-- ================================= -->
 
 <div class="box">
 
@@ -161,10 +154,6 @@ button:disabled{
 </div>
 
 
-<!-- ================================= -->
-<!-- 3. 복장 이미지 -->
-<!-- ================================= -->
-
 <div class="box">
 
 <div class="title">3. 👕 복장 참고 이미지</div>
@@ -189,10 +178,6 @@ button:disabled{
 </div>
 
 
-<!-- ================================= -->
-<!-- 4. 복장 글 -->
-<!-- ================================= -->
-
 <div class="box">
 
 <div class="title">4. ✏️ 원하는 복장</div>
@@ -209,10 +194,6 @@ button:disabled{
 
 </div>
 
-
-<!-- ================================= -->
-<!-- 5. 표정 이미지 -->
-<!-- ================================= -->
 
 <div class="box">
 
@@ -238,10 +219,6 @@ button:disabled{
 </div>
 
 
-<!-- ================================= -->
-<!-- 6. 표정 글 -->
-<!-- ================================= -->
-
 <div class="box">
 
 <div class="title">6. 😊 원하는 표정</div>
@@ -258,10 +235,6 @@ button:disabled{
 
 </div>
 
-
-<!-- ================================= -->
-<!-- 7. 그림체 강도 -->
-<!-- ================================= -->
 
 <div class="box">
 
@@ -295,10 +268,6 @@ button:disabled{
 </div>
 
 
-<!-- ================================= -->
-<!-- 8. 추가 요청 -->
-<!-- ================================= -->
-
 <div class="box">
 
 <div class="title">8. 💬 추가 요청</div>
@@ -311,10 +280,6 @@ button:disabled{
 
 </div>
 
-
-<!-- ================================= -->
-<!-- 생성 -->
-<!-- ================================= -->
 
 <div class="box">
 
@@ -337,11 +302,6 @@ button:disabled{
 
 <script>
 
-
-// =====================================
-// 파일을 데이터로 변환
-// =====================================
-
 const toDataURL = file => new Promise((resolve,reject)=>{
 
   const reader = new FileReader();
@@ -354,10 +314,6 @@ const toDataURL = file => new Promise((resolve,reject)=>{
 
 });
 
-
-// =====================================
-// 미리보기 함수
-// =====================================
 
 function previewFiles(inputId, previewId, max){
 
@@ -390,45 +346,14 @@ function previewFiles(inputId, previewId, max){
 }
 
 
-// 캐릭터
+previewFiles("char","charPreview",1);
 
-previewFiles(
-  "char",
-  "charPreview",
-  1
-);
+previewFiles("styles","stylePreview",6);
 
+previewFiles("outfitImages","outfitPreview",4);
 
-// 그림체
+previewFiles("expressionImages","expressionPreview",4);
 
-previewFiles(
-  "styles",
-  "stylePreview",
-  6
-);
-
-
-// 복장
-
-previewFiles(
-  "outfitImages",
-  "outfitPreview",
-  4
-);
-
-
-// 표정
-
-previewFiles(
-  "expressionImages",
-  "expressionPreview",
-  4
-);
-
-
-// =====================================
-// 강도 표시
-// =====================================
 
 const strength =
   document.getElementById("strength");
@@ -444,10 +369,6 @@ strength.addEventListener("input",()=>{
 });
 
 
-// =====================================
-// 그림체 지시문
-// =====================================
-
 function styleInstruction(level){
 
   if(level <= 3){
@@ -459,7 +380,6 @@ function styleInstruction(level){
 
   }
 
-
   if(level <= 6){
 
     return `
@@ -469,7 +389,6 @@ function styleInstruction(level){
 `;
 
   }
-
 
   if(level <= 8){
 
@@ -484,7 +403,6 @@ function styleInstruction(level){
 `;
 
   }
-
 
   return `
 그림체 참고 이미지의 시각적 표현 방식을
@@ -526,20 +444,14 @@ function styleInstruction(level){
 }
 
 
-// =====================================
-// 그림 생성
-// =====================================
-
 document
 .getElementById("go")
 .onclick = async ()=>{
-
 
   const char =
     document
     .getElementById("char")
     .files[0];
-
 
   const styles =
     [
@@ -548,14 +460,12 @@ document
       .files
     ].slice(0,6);
 
-
   const outfitImages =
     [
       ...document
       .getElementById("outfitImages")
       .files
     ].slice(0,4);
-
 
   const expressionImages =
     [
@@ -564,13 +474,11 @@ document
       .files
     ].slice(0,4);
 
-
   const outfitText =
     document
     .getElementById("outfitText")
     .value
     .trim();
-
 
   const expressionText =
     document
@@ -578,13 +486,11 @@ document
     .value
     .trim();
 
-
   const extra =
     document
     .getElementById("extra")
     .value
     .trim();
-
 
   const level =
     Number(
@@ -593,36 +499,26 @@ document
       .value
     );
 
-
   const status =
     document
     .getElementById("status");
-
 
   const result =
     document
     .getElementById("result");
 
-
   const save =
     document
     .getElementById("save");
-
 
   const btn =
     document
     .getElementById("go");
 
 
-  // -----------------------------------
-  // 확인
-  // -----------------------------------
-
   if(!char){
 
-    alert(
-      "캐릭터 이미지를 올려줘!"
-    );
+    alert("캐릭터 이미지를 올려줘!");
 
     return;
 
@@ -631,9 +527,18 @@ document
 
   if(!styles.length){
 
-    alert(
-      "그림체 참고 이미지를 한 장 이상 올려줘!"
-    );
+    alert("그림체 참고 이미지를 한 장 이상 올려줘!");
+
+    return;
+
+  }
+
+
+  // =================================
+  // 중복 생성 방지
+  // =================================
+
+  if(btn.disabled){
 
     return;
 
@@ -652,23 +557,16 @@ document
 
   try{
 
-
-    // ---------------------------------
-    // 이미지 순서
-    // ---------------------------------
-
     const inputs = [];
 
 
-    // 1번 = 캐릭터
-
+    // 캐릭터
     inputs.push(
       await toDataURL(char)
     );
 
 
-    // 2~7번 = 그림체
-
+    // 그림체
     for(const file of styles){
 
       inputs.push(
@@ -678,8 +576,7 @@ document
     }
 
 
-    // 복장 참고 이미지
-
+    // 복장
     for(const file of outfitImages){
 
       inputs.push(
@@ -689,8 +586,7 @@ document
     }
 
 
-    // 표정 참고 이미지
-
+    // 표정
     for(const file of expressionImages){
 
       inputs.push(
@@ -699,10 +595,6 @@ document
 
     }
 
-
-    // ---------------------------------
-    // 복장 지시
-    // ---------------------------------
 
     let outfitInstruction = "";
 
@@ -756,10 +648,6 @@ ${outfitText}
     }
 
 
-    // ---------------------------------
-    // 표정 지시
-    // ---------------------------------
-
     let expressionInstruction = "";
 
 
@@ -808,10 +696,6 @@ ${expressionText}
 
     }
 
-
-    // ---------------------------------
-    // 최종 프롬프트
-    // ---------------------------------
 
     const prompt = `
 
@@ -954,16 +838,19 @@ ${extra || "특별한 추가 요청은 없다."}
 캐릭터의 정체성을 유지하면서
 그림체의 시각적 특징을 최대한 강하게 반영한다.
 
+최종 결과는 하나의 이미지로 생성한다.
+여러 개의 결과를 만들지 않는다.
+
 `;
 
 
-    // ---------------------------------
-    // 생성
-    // ---------------------------------
-
     status.textContent =
-      "AI가 캐릭터·그림체·복장·표정을 분석하는 중...";
+      "AI가 이미지를 생성하는 중...";
 
+
+    // =================================
+    // ⭐ 핵심: MEDIUM → LOW
+    // =================================
 
     const image =
       await puter.ai.txt2img({
@@ -972,26 +859,18 @@ ${extra || "특별한 추가 요청은 없다."}
 
         model: "gpt-image-2",
 
-        quality: "medium",
+        quality: "low",
 
         input_images: inputs
 
       });
 
 
-    // ---------------------------------
-    // 결과
-    // ---------------------------------
-
     result.appendChild(image);
 
     status.textContent =
       "✨ 완성!";
 
-
-    // ---------------------------------
-    // 저장
-    // ---------------------------------
 
     save.style.display =
       "block";
@@ -1005,9 +884,7 @@ ${extra || "특별한 추가 요청은 없다."}
 
       if(!img){
 
-        alert(
-          "저장할 이미지가 없어."
-        );
+        alert("저장할 이미지가 없어.");
 
         return;
 
@@ -1017,14 +894,11 @@ ${extra || "특별한 추가 요청은 없다."}
       const link =
         document.createElement("a");
 
-
       link.href =
         img.src;
 
-
       link.download =
         "style-character-result.png";
-
 
       link.click();
 
@@ -1052,6 +926,7 @@ ${extra || "특별한 추가 요청은 없다."}
 
   finally{
 
+    // 생성이 끝나면 다시 버튼 활성화
     btn.disabled = false;
 
   }
