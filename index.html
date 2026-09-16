@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>그림체 캐릭터 AI</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#f5f5f7;color:#222}
+.wrap{max-width:720px;margin:auto;padding:18px}.card{background:white;border-radius:18px;padding:18px;margin:12px 0;box-shadow:0 2px 12px #00000012}
+h1{font-size:25px;margin:4px 0 8px}.sub{color:#666;font-size:14px}
+label{display:block;font-weight:700;margin:14px 0 7px}input[type=file],textarea,select{width:100%;font:inherit}
+input[type=file]{padding:13px;border:2px dashed #bbb;border-radius:12px;background:#fafafa}
+textarea,select{padding:12px;border:1px solid #ccc;border-radius:10px}
+button{width:100%;border:0;border-radius:12px;padding:14px;font-size:17px;font-weight:700;background:#111;color:white;margin-top:16px}
+button:disabled{opacity:.5}#status{margin-top:12px;color:#555;white-space:pre-wrap}.preview{width:100%;border-radius:14px;margin-top:12px;display:none}
+.small{font-size:12px;color:#777;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="card">
+<h1>🎨 그림체 캐릭터 AI</h1>
+<div class="sub">캐릭터 이미지 + 그림체 참고 이미지를 넣고 새 그림을 만들어보세요.</div>
+
+<label>① 캐릭터 이미지</label>
+<input id="character" type="file" accept="image/*">
+
+<label>② 그림체 참고 이미지</label>
+<input id="styles" type="file" accept="image/*" multiple>
+
+<label>③ 원하는 모습 (선택)</label>
+<textarea id="request" rows="3" placeholder="예: 전신, 정면, 교실 배경"></textarea>
+
+<label>캐릭터 특징 보존</label>
+<select id="preserve">
+<option>높음</option><option>보통</option><option>낮음</option>
+</select>
+
+<button id="generate">✨ 그림 생성</button>
+<div id="status"></div>
+<img id="result" class="preview">
+<div class="small">
+이 화면은 휴대폰용 프론트엔드입니다. 실제 이미지 생성은 안전한 서버에서 API 키를 사용하도록 연결해야 합니다.
+</div>
+</div>
+</div>
+
+<script>
+const btn=document.querySelector('#generate');
+const status=document.querySelector('#status');
+const result=document.querySelector('#result');
+
+function fileToBase64(file){
+ return new Promise((resolve,reject)=>{
+  const r=new FileReader();
+  r.onload=()=>resolve(r.result);
+  r.onerror=reject;
+  r.readAsDataURL(file);
+ });
+}
+
+btn.onclick=async()=>{
+ const c=document.querySelector('#character').files[0];
+ const s=[...document.querySelector('#styles').files];
+ if(!c){status.textContent='캐릭터 이미지를 먼저 넣어주세요.';return}
+ if(!s.length){status.textContent='그림체 참고 이미지를 넣어주세요.';return}
+
+ btn.disabled=true;
+ status.textContent='이미지를 준비하고 있어요...';
+
+ try{
+  const payload={
+   character:await fileToBase64(c),
+   styles:await Promise.all(s.slice(0,15).map(fileToBase64)),
+   request:document.querySelector('#request').value,
+   preserve:document.querySelector('#preserve').value
+  };
+
+  // 서버를 배포한 뒤 아래 주소를 서버 주소로 바꾸세요.
+  const SERVER_URL='YOUR_SERVER_URL/generate';
+  const response=await fetch(SERVER_URL,{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify(payload)
+  });
+
+  if(!response.ok) throw new Error(await response.text());
+  const data=await response.json();
+  result.src=data.image;
+  result.style.display='block';
+  status.textContent='완성됐어요!';
+ }catch(e){
+  status.textContent='아직 생성 서버가 연결되지 않았어요.\n' + e.message;
+ }finally{
+  btn.disabled=false;
+ }
+};
+</script>
+</body>
+</html>
