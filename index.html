@@ -3,89 +3,636 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
 <title>캐릭터 스타일 AI</title>
+
 <script src="https://js.puter.com/v2/"></script>
+
 <style>
-body{font-family:Arial,sans-serif;max-width:720px;margin:auto;padding:18px;background:#f5f5f5}
-.box{background:#fff;padding:16px;margin:12px 0;border-radius:14px}
-input,textarea,button{width:100%;box-sizing:border-box;margin-top:8px;padding:12px;border-radius:10px;border:1px solid #ccc}
-button{background:#222;color:#fff;font-weight:bold;border:0}
-button:disabled{opacity:.5}
-img{max-width:100%;border-radius:12px;margin-top:12px}
+*{
+  box-sizing:border-box;
+}
+
+body{
+  font-family:Arial,sans-serif;
+  max-width:760px;
+  margin:auto;
+  padding:18px;
+  background:#f5f5f5;
+  color:#222;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:22px;
+}
+
+.box{
+  background:#fff;
+  padding:18px;
+  margin:14px 0;
+  border-radius:16px;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
+}
+
+.title{
+  font-weight:bold;
+  font-size:17px;
+  margin-bottom:8px;
+}
+
+.description{
+  color:#666;
+  font-size:13px;
+  line-height:1.5;
+  margin-bottom:10px;
+}
+
+input[type=file],
+textarea{
+  width:100%;
+  margin-top:8px;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  background:#fff;
+}
+
+textarea{
+  resize:vertical;
+}
+
+input[type=range]{
+  width:100%;
+  margin-top:12px;
+}
+
+.range-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:8px;
+}
+
+#strengthValue{
+  font-weight:bold;
+}
+
+button{
+  width:100%;
+  margin-top:10px;
+  padding:14px;
+  border:0;
+  border-radius:11px;
+  background:#222;
+  color:#fff;
+  font-weight:bold;
+  font-size:15px;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.secondary{
+  background:#555;
+}
+
+.preview{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-top:12px;
+}
+
+.preview img{
+  width:100%;
+  aspect-ratio:1/1;
+  object-fit:cover;
+  border-radius:10px;
+}
+
+#result img{
+  width:100%;
+  border-radius:14px;
+  margin-top:12px;
+}
+
+#status{
+  text-align:center;
+  font-weight:bold;
+  margin-top:14px;
+}
+
+.small{
+  font-size:12px;
+  color:#777;
+  line-height:1.5;
+  margin-top:8px;
+}
 </style>
 </head>
+
 <body>
+
 <h1>🎨 캐릭터 스타일 AI</h1>
+
+
+<!-- 캐릭터 -->
 <div class="box">
-<b>1. 캐릭터 이미지</b>
-<input id="char" type="file" accept="image/*">
+
+  <div class="title">1. 캐릭터 이미지</div>
+
+  <div class="description">
+    원하는 캐릭터의 모습을 보여주는 이미지를 넣어줘.
+  </div>
+
+  <input
+    id="char"
+    type="file"
+    accept="image/*"
+  >
+
+  <div id="charPreview" class="preview"></div>
+
 </div>
+
+
+<!-- 스타일 -->
 <div class="box">
-<b>2. 스타일 참고 이미지 (여러 장)</b>
-<input id="styles" type="file" accept="image/*" multiple>
+
+  <div class="title">2. 그림체 참고 이미지</div>
+
+  <div class="description">
+    원하는 그림체가 잘 나타나는 이미지를 여러 장 넣어줘.
+    선화, 색감, 채색 방식이 잘 보이는 이미지가 좋다.
+  </div>
+
+  <input
+    id="styles"
+    type="file"
+    accept="image/*"
+    multiple
+  >
+
+  <div id="stylePreview" class="preview"></div>
+
+  <div class="small">
+    최대 6장까지 사용하는 것을 권장해.
+  </div>
+
 </div>
+
+
+<!-- 스타일 강도 -->
 <div class="box">
-<b>3. 원하는 요청</b>
-<textarea id="prompt" rows="4" placeholder="예: 캐릭터의 얼굴과 옷은 유지하고 참고 이미지의 선화와 색감 느낌을 반영해줘."></textarea>
+
+  <div class="title">3. 그림체 반영 강도</div>
+
+  <div class="description">
+    높일수록 참고 이미지의 시각적 특징을 더 강하게 반영하도록 요청해.
+  </div>
+
+  <input
+    id="strength"
+    type="range"
+    min="1"
+    max="10"
+    value="8"
+  >
+
+  <div class="range-row">
+    <span>캐릭터 중심</span>
+    <span id="strengthValue">8 / 10</span>
+    <span>그림체 중심</span>
+  </div>
+
 </div>
+
+
+<!-- 추가 요청 -->
 <div class="box">
-<button id="go">✨ 그림 만들기</button>
-<p id="status"></p>
-<div id="result"></div>
+
+  <div class="title">4. 원하는 그림</div>
+
+  <textarea
+    id="prompt"
+    rows="5"
+    placeholder="예: 전신으로 그려줘. 자연스럽게 서 있는 자세로 만들어줘."
+  ></textarea>
+
 </div>
+
+
+<!-- 생성 -->
+<div class="box">
+
+  <button id="go">
+    ✨ 그림 만들기
+  </button>
+
+  <p id="status"></p>
+
+  <div id="result"></div>
+
+  <button
+    id="save"
+    class="secondary"
+    style="display:none;"
+  >
+    🖼️ 결과 이미지 저장
+  </button>
+
+</div>
+
 
 <script>
-const toDataURL = f => new Promise((resolve,reject)=>{
-  const r=new FileReader();
-  r.onload=()=>resolve(r.result);
-  r.onerror=reject;
-  r.readAsDataURL(f);
+
+/* -----------------------------
+   파일 → Data URL
+----------------------------- */
+
+const toDataURL = (file) => {
+
+  return new Promise((resolve,reject)=>{
+
+    const reader = new FileReader();
+
+    reader.onload = () => resolve(reader.result);
+
+    reader.onerror = reject;
+
+    reader.readAsDataURL(file);
+
+  });
+
+};
+
+
+/* -----------------------------
+   미리보기
+----------------------------- */
+
+function showPreview(input, container){
+
+  container.innerHTML = "";
+
+  const files = [...input.files];
+
+  files.forEach(file => {
+
+    const reader = new FileReader();
+
+    reader.onload = e => {
+
+      const img = document.createElement("img");
+
+      img.src = e.target.result;
+
+      container.appendChild(img);
+
+    };
+
+    reader.readAsDataURL(file);
+
+  });
+
+}
+
+
+/* -----------------------------
+   캐릭터 미리보기
+----------------------------- */
+
+document
+  .getElementById("char")
+  .addEventListener("change", function(){
+
+    showPreview(
+      this,
+      document.getElementById("charPreview")
+    );
+
+  });
+
+
+/* -----------------------------
+   스타일 미리보기
+----------------------------- */
+
+document
+  .getElementById("styles")
+  .addEventListener("change", function(){
+
+    showPreview(
+      this,
+      document.getElementById("stylePreview")
+    );
+
+  });
+
+
+/* -----------------------------
+   스타일 강도 표시
+----------------------------- */
+
+const strength =
+  document.getElementById("strength");
+
+const strengthValue =
+  document.getElementById("strengthValue");
+
+strength.addEventListener("input", ()=>{
+
+  strengthValue.textContent =
+    strength.value + " / 10";
+
 });
 
-document.getElementById("go").onclick = async () => {
-  const char=document.getElementById("char").files[0];
-  const styles=[...document.getElementById("styles").files];
-  const extra=document.getElementById("prompt").value.trim();
-  const status=document.getElementById("status");
-  const result=document.getElementById("result");
-  const btn=document.getElementById("go");
 
-  if(!char) return alert("캐릭터 이미지를 올려줘!");
-  if(!styles.length) return alert("스타일 참고 이미지를 한 장 이상 올려줘!");
+/* -----------------------------
+   생성
+----------------------------- */
 
-  btn.disabled=true;
-  result.innerHTML="";
-  status.textContent="이미지를 준비하는 중...";
+document
+  .getElementById("go")
+  .onclick = async () => {
+
+  const char =
+    document.getElementById("char").files[0];
+
+  let styles =
+    [...document.getElementById("styles").files];
+
+  const extra =
+    document
+      .getElementById("prompt")
+      .value
+      .trim();
+
+  const status =
+    document.getElementById("status");
+
+  const result =
+    document.getElementById("result");
+
+  const button =
+    document.getElementById("go");
+
+  const saveButton =
+    document.getElementById("save");
+
+  const styleStrength =
+    Number(strength.value);
+
+
+  /* -----------------------------
+     기본 검사
+  ----------------------------- */
+
+  if(!char){
+
+    alert("캐릭터 이미지를 올려줘!");
+
+    return;
+
+  }
+
+
+  if(!styles.length){
+
+    alert("그림체 참고 이미지를 한 장 이상 올려줘!");
+
+    return;
+
+  }
+
+
+  /* 최대 6장 */
+
+  if(styles.length > 6){
+
+    styles = styles.slice(0,6);
+
+    alert(
+      "그림체 참고 이미지는 최대 6장까지만 사용했어."
+    );
+
+  }
+
+
+  button.disabled = true;
+
+  saveButton.style.display = "none";
+
+  result.innerHTML = "";
+
+  status.textContent =
+    "이미지를 준비하는 중...";
+
 
   try{
-    const inputs=[await toDataURL(char)];
-    for(const f of styles) inputs.push(await toDataURL(f));
 
-    const prompt =
-      "첫 번째 이미지는 캐릭터 기준 이미지이고 나머지는 시각적 참고 이미지다. " +
-      "첫 번째 이미지의 캐릭터 정체성과 주요 특징은 유지한다. " +
-      "나머지 참고 이미지의 선화, 색감, 명암, 표현 방식 등의 시각적 특징을 참고해 새로운 그림을 만든다. " +
-      "참고 이미지 속 특정 인물이나 고유 캐릭터를 그대로 복제하지 않는다. " +
-      (extra || "자연스럽고 완성도 높은 일러스트로 만들어줘.");
+    /* -----------------------------
+       이미지 준비
+    ----------------------------- */
 
-    status.textContent="AI가 그림을 만드는 중...";
+    const characterImage =
+      await toDataURL(char);
 
-    const image=await puter.ai.txt2img({
-      prompt,
-      model:"gpt-image-2",
-      input_images:inputs
-    });
+    const styleImages = [];
+
+    for(const file of styles){
+
+      styleImages.push(
+        await toDataURL(file)
+      );
+
+    }
+
+
+    /*
+      첫 번째 = 캐릭터
+      이후 = 스타일 참고 이미지
+    */
+
+    const inputs = [
+      characterImage,
+      ...styleImages
+    ];
+
+
+    /* -----------------------------
+       스타일 강도에 따른 지시
+    ----------------------------- */
+
+    let styleInstruction = "";
+
+    if(styleStrength <= 3){
+
+      styleInstruction = `
+      캐릭터의 원래 모습과 특징을 가장 중요하게 유지한다.
+      참고 이미지는 전체적인 분위기와 색감만 참고한다.
+      `;
+
+    }
+    else if(styleStrength <= 6){
+
+      styleInstruction = `
+      캐릭터의 정체성과 주요 특징은 유지하면서
+      참고 이미지의 선화, 색감, 채색 방식, 명암 표현을 적극적으로 반영한다.
+      `;
+
+    }
+    else if(styleStrength <= 8){
+
+      styleInstruction = `
+      캐릭터의 얼굴과 주요 특징은 유지한다.
+      참고 이미지들의 시각적 특징을 매우 강하게 반영한다.
+      특히 선의 느낌, 선 굵기, 색상 구성,
+      채색 방식, 명암, 눈과 얼굴 표현,
+      그림의 전체적인 마감 방식을 참고한다.
+      `;
+
+    }
+    else{
+
+      styleInstruction = `
+      캐릭터의 정체성과 알아볼 수 있는 특징은 유지한다.
+      참고 이미지의 시각적 스타일을 최우선으로 반영한다.
+      선화, 선 굵기, 색감, 색의 배치,
+      채색 방식, 명암 방식, 얼굴 표현,
+      눈과 머리카락 표현,
+      그림의 전체적인 질감과 마감 방식을
+      참고 이미지와 최대한 일관되게 만든다.
+      `;
+
+    }
+
+
+    /* -----------------------------
+       최종 프롬프트
+    ----------------------------- */
+
+    const prompt = `
+
+      Create a new original character illustration.
+
+      IMAGE 1 is the CHARACTER REFERENCE.
+
+      The remaining images are STYLE REFERENCES.
+
+      The character reference determines:
+      - character identity
+      - face
+      - hairstyle
+      - clothing
+      - important character features
+
+      The style references determine:
+      - line art
+      - line weight
+      - coloring
+      - shading
+      - color relationships
+      - facial rendering
+      - eye rendering
+      - hair rendering
+      - texture
+      - overall illustration finish
+
+      ${styleInstruction}
+
+      Do not simply copy the composition of the reference images.
+      Create a new illustration of the character.
+
+      Keep the character recognizable.
+
+      Make the result visually coherent and polished.
+
+      ${extra || "Create a natural full illustration of the character."}
+
+    `;
+
+
+    status.textContent =
+      "AI가 그림체와 캐릭터를 분석하고 있어...";
+
+
+    /* -----------------------------
+       이미지 생성
+    ----------------------------- */
+
+    const image =
+      await puter.ai.txt2img({
+
+        prompt: prompt,
+
+        model: "gpt-image-2",
+
+        quality: "high",
+
+        input_images: inputs
+
+      });
+
+
+    /* -----------------------------
+       결과 출력
+    ----------------------------- */
 
     result.appendChild(image);
-    status.textContent="완성!";
-  }catch(err){
-    console.error(err);
-    status.textContent="생성에 실패했어.";
-    alert("생성에 실패했어. 잠시 후 다시 시도해줘.\n"+(err.message||err));
-  }finally{
-    btn.disabled=false;
+
+    status.textContent =
+      "✨ 완성!";
+
+
+    /* -----------------------------
+       저장 버튼
+    ----------------------------- */
+
+    saveButton.style.display = "block";
+
+    saveButton.onclick = () => {
+
+      const link =
+        document.createElement("a");
+
+      link.href = image.src;
+
+      link.download =
+        "character-style-ai.png";
+
+      link.click();
+
+    };
+
+
   }
+  catch(error){
+
+    console.error(error);
+
+    status.textContent =
+      "생성에 실패했어.";
+
+    alert(
+      "생성에 실패했어.\n\n" +
+      (error.message || error)
+    );
+
+  }
+  finally{
+
+    button.disabled = false;
+
+  }
+
 };
+
 </script>
+
 </body>
 </html>
